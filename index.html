@@ -43,13 +43,13 @@
       <section style="background-image: url(images/pokedex.png)" class="bg-plain"></section>
       <section class="yellow-bg">
         <blockquote>
-          <p>Ask any iOS or Android developer how we make our apps so fast,<br>and most likely you'll hear about two major strategies:</p>
+          <p><span>&ldquo;</span>Ask any iOS or Android developer how we make our apps so fast,<br>and most likely you'll hear about two major strategies<span>&rdquo;</span></p>
           <p><strong>Eliminate network calls</strong><br><strong>Use background threads</strong></p>
         </blockquote>
       </section>
       <section class="yellow-bg">
         <blockquote>
-          <p style="margin: 2em 0"><span>&ldquo;</span>Anything unrelated to the UI should be offloaded to a background thread.<span>&rdquo;</span></p>
+          <h1 style="margin: 2em 0"><span>&ldquo;</span>Anything unrelated to the UI should be<br>offloaded to a background thread.<span>&rdquo;</span></h1>
           <p class="animate-up">Working in the Main Thread should be the exception</p>
         </blockquote>
       </section>
@@ -61,57 +61,6 @@
       <section class="yellow-bg">
         <h1>The Main Thread has 3 responsibilities</h1>
         <p>sending "state of the world" to worker on start<br>listening for and sending serializable actions back to the worker<br>applying DOM patches when received from worker</p>
-      </section>
-      <section>
-        <h1>main.js</h1>
-        <pre><code class="language-javascript">import WorkerThread from './worker.thread'
-import virtualize from 'vdom-virtualize'
-import toJson from 'vdom-as-json/toJson'
-import applyPatch from 'vdom-serialized-patch/patch'
-import { getLocalPathname } from 'local-links'
-
-const worker = new WorkerThread()
-const rootElement = document.body.firstChild
-
-worker.onmessage = ({data}) =&gt; {
-  const { url, payload } = data
-  requestAnimationFrame(() =&gt; {
-    applyPatch(rootElement, payload)
-  })
-  
-  if (location.pathname !== url) {
-    history.pushState(null, null, url)
-  }
-}
-
-// init virtual-dom with server-rendered html
-worker.postMessage({type: 'start', payload: {
-  virtualDom: toJson(virtualize(rootElement)),
-  url: location.pathname
-}})
-
-// Support back buttons
-window.addEventListener('popstate', () =&gt; {
-  worker.postMessage({type: 'setUrl', payload: location.pathname})
-})
-
-// listen for all events globally
-document.body.addEventListener('click', (event) =&gt; {
-
-  const pathname = getLocalPathname(event)
-  if (pathname) {
-    event.preventDefault()
-    
-    worker.postMessage({type: 'setUrl', payload: pathname})
-    return
-  }
-  
-  const click = event.target['data-click']
-  if (click) {
-    event.preventDefault()
-    worker.postMessage(click)
-  }
-})</code></pre>
       </section>
       <section>
         <h1>worker.thread.js</h1>
@@ -154,7 +103,61 @@ self.onmessage = ({data}) =&gt; {
   currentVDom = newVDom
   
   self.postMessage({url: state.url, payload: serializePatch(patches)})
-}</code></pre>
+}
+</code></pre>
+      </section>
+      <section>
+        <h1>main.js</h1>
+        <pre><code class="language-javascript">import WorkerThread from './worker.thread'
+import virtualize from 'vdom-virtualize'
+import toJson from 'vdom-as-json/toJson'
+import applyPatch from 'vdom-serialized-patch/patch'
+import { getLocalPathname } from 'local-links'
+
+// webpack's worker-loader
+const worker = new WorkerThread()
+const rootElement = document.body.firstChild
+
+worker.onmessage = ({data}) =&gt; {
+  const { url, payload } = data
+  requestAnimationFrame(() =&gt; {
+    applyPatch(rootElement, payload)
+  })
+  
+  if (location.pathname !== url) {
+    history.pushState(null, null, url)
+  }
+}
+
+// init virtual-dom with server-rendered html
+worker.postMessage({type: 'start', payload: {
+  virtualDom: toJson(virtualize(rootElement)),
+  url: location.pathname
+}})
+
+// Support back/forward buttons
+window.addEventListener('popstate', () =&gt; {
+  worker.postMessage({type: 'setUrl', payload: location.pathname})
+})
+
+// listen for all events globally
+document.body.addEventListener('click', (event) =&gt; {
+
+  const pathname = getLocalPathname(event)
+  if (pathname) {
+    event.preventDefault()
+    
+    worker.postMessage({type: 'setUrl', payload: pathname})
+    return
+  }
+  
+  const click = event.target['data-click']
+  if (click) {
+    event.preventDefault()
+    worker.postMessage(click)
+  }
+})
+</code></pre>
       </section>
       <section>
         <h1>app.js</h1>
@@ -198,7 +201,10 @@ export default (state) =&gt; {
       </section>
       <section class="yellow-bg">
         <h1 style="margin: 2em 0">How to approach the <span style="text-decoration: line-through">Mobile</span> Web</h1>
-        <p class="animate-up">React and Angular 2 both working on it</p>
+        <div class="animate-up">
+          <p>https://github.com/reactjs/react-future</p>
+          <p>Angular 2 team are all over it</p>
+        </div>
       </section>
       <section>
         <h1>Thanks</h1>

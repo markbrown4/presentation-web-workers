@@ -1,0 +1,235 @@
+doctype html
+html
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+    title Working Off the Main Thread
+    link(rel='stylesheet', type='text/css', href='build/build.css')
+
+  body
+    article
+
+      section
+        h1
+          span Working Off the 
+          strong Main Thread
+
+      section.bg( style="background-image: url(images/henrik.jpg)" )
+        .pad-lg
+          p
+            strong @henrikjoreteg
+          h1 Pocket-sized JS
+          p dotJS 2015
+      
+      section.yellow-bg
+        h1 How to approach the Mobile Web
+
+      section.yellow-bg
+        h1 Actually test on mobile devices
+        p If you want to write fast software use a slow computer
+      
+      section.yellow-bg
+        h1 Send HTML
+        pre
+          code.language-html.
+            &lt;!doctype html&gt;
+            &lt;script src="app.js"&gt;&lt;/script&gt;
+
+      section.yellow-bg
+        h1 Ship less code
+        p
+          | Google+ &lt; 60kb JS
+          br
+          | Soundslice ~94kb JS
+        p It may be hard but it's not impossible
+
+      section.yellow-bg
+        h4(style="font-size: 120px") WEBWORKERS!
+        p.animate-up Even really old android phones have multiple cores
+
+      section.bg-plain( style="background-image: url(images/pokedex.png)" )
+
+      section.yellow-bg
+        blockquote
+          p
+            | Ask any iOS or Android developer how we make our apps so fast,
+            br
+            | and most likely you'll hear about two major strategies:
+          p
+            strong Eliminate network calls
+            br
+            strong Use background threads
+
+      section.yellow-bg
+        blockquote
+          p(style='margin: 2em 0')
+            &ldquo;
+            | Anything unrelated to the UI should be offloaded to a background thread.
+            &rdquo;
+          p.animate-up Working in the Main Thread should be the exception
+
+      section.yellow-bg
+        h1 feather-app
+        p ~8.5kb JS
+        p http://feather.surge.sh
+      
+      section.yellow-bg
+        h1 The Main Thread has 3 responsibilities
+        p
+          | sending "state of the world" to worker on start
+          br
+          | listening for and sending serializable actions back to the worker
+          br
+          | applying DOM patches when received from worker
+      
+      section
+        h1 main.js
+        pre
+          code.language-javascript.
+            import WorkerThread from './worker.thread'
+            import virtualize from 'vdom-virtualize'
+            import toJson from 'vdom-as-json/toJson'
+            import applyPatch from 'vdom-serialized-patch/patch'
+            import { getLocalPathname } from 'local-links'
+
+            const worker = new WorkerThread()
+            const rootElement = document.body.firstChild
+
+            worker.onmessage = ({data}) =&gt; {
+              const { url, payload } = data
+              requestAnimationFrame(() =&gt; {
+                applyPatch(rootElement, payload)
+              })
+
+              if (location.pathname !== url) {
+                history.pushState(null, null, url)
+              }
+            }
+            
+            // init virtual-dom with server-rendered html
+            worker.postMessage({type: 'start', payload: {
+              virtualDom: toJson(virtualize(rootElement)),
+              url: location.pathname
+            }})
+
+            // Support back buttons
+            window.addEventListener('popstate', () =&gt; {
+              worker.postMessage({type: 'setUrl', payload: location.pathname})
+            })
+
+            // listen for all events globally
+            document.body.addEventListener('click', (event) =&gt; {
+              
+              const pathname = getLocalPathname(event)
+              if (pathname) {
+                event.preventDefault()
+
+                worker.postMessage({type: 'setUrl', payload: pathname})
+                return
+              }
+
+              const click = event.target['data-click']
+              if (click) {
+                event.preventDefault()
+                worker.postMessage(click)
+              }
+            })
+      section
+        h1 worker.thread.js
+        pre
+          code.language-javascript.
+            import diff from 'virtual-dom/diff'
+            import serializePatch from 'vdom-serialized-patch/serialize'
+            import fromJson from 'vdom-as-json/fromJson'
+            import app from './views/app'
+
+            let currentVDom
+            const state = {
+              count: 0,
+              url: '/'
+            }
+
+            self.onmessage = ({data}) =&gt; {
+              const { type, payload } = data
+
+              switch (type) {
+                case 'start': {
+                  currentVDom = fromJson(payload.virtualDom)
+                  state.url = payload.url
+                  break
+                }
+                case 'setUrl': {
+                  state.url = payload
+                  break
+                }
+                case 'increment': {
+                  state.count++
+                  break
+                }
+                case 'decrement': {
+                  state.count--
+                  break
+                }
+              }
+
+              const newVDom = app(state)
+              const patches = diff(currentVDom, newVDom)
+              currentVDom = newVDom
+
+              self.postMessage({url: state.url, payload: serializePatch(patches)})
+            }
+      section
+        h1 app.js
+        pre
+          code.language-javascript.
+            import home from './home'
+            import about from './about'
+
+            export default (state) =&gt; {
+              const { url } = state
+              let page
+
+              if (url === '/') {
+                page = home(state)
+              } else if (url === '/about') {
+                page = about()
+              }
+
+              return (
+                &lt;main&gt;
+                  &lt;h1&gt;Feather POC App&lt;/h1&gt;
+                  &lt;nav&gt;
+                    &lt;a href='/'&gt;home&lt;/a&gt; | &lt;a href='/about'&gt;about&lt;/a&gt;
+                  &lt;/nav&gt;
+                  {page}
+                &lt;/main&gt;
+              )
+            }
+            
+      section
+        h1 home.js
+        pre
+          code.language-javascript.
+            export default ({count}) =&gt; (
+              &lt;div&gt;
+                &lt;p&gt;This app weighs about 8.5kb&lt;/p&gt;
+                &lt;button data-click={{type: 'decrement'}}&gt; - &lt;/button&gt;
+                &lt;span&gt; {count} &lt;/span&gt;
+                &lt;button data-click={{type: 'increment'}}&gt; + &lt;/button&gt;
+              &lt;/div&gt;
+            )
+
+
+      section.yellow-bg
+        h1(style="margin: 2em 0")
+          | How to approach the 
+          span(style="text-decoration: line-through") Mobile
+          |  Web
+        p.animate-up React and Angular 2 both working on it
+
+      section
+        h1 Thanks
+        p @markbrown4
+        img(src="images/i9dev-logo.svg" width="150")
+
+    script(src='build/build.js')

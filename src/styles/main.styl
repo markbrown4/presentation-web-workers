@@ -1,0 +1,149 @@
+
+@import 'normalizecss/normalize.css'
+
+@import 'prism/themes/prism-okaidia.css'
+
+$smurf = #487FC1
+$lips = #F05562
+
+a
+  color: #fff
+
+.bespoke-parent
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  overflow: hidden
+
+.bespoke-slide
+  position: absolute
+  top: 0
+  left: 0
+  bottom: 0
+  right: 0
+  display: flex
+  flex-direction: column
+  justify-content: center
+  align-items: center
+  background: #000
+  color: white
+
+.bespoke-inactive
+  opacity: 0
+  pointer-events: none
+
+.bespoke-bullet-inactive
+  opacity: 0
+  pointer-events: none
+
+.bespoke-backdrop
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  bottom: 0
+  z-index: -1
+  opacity: 0
+
+.bespoke-backdrop-active
+  opacity: 1
+
+.bespoke-progress-parent
+  position: absolute
+  top: 0
+  left: 0
+  right: 0
+  height: .3vw
+
+.bespoke-progress-bar
+  position: absolute
+  height: 100%
+  background: #ccc
+  transition: width .6s ease
+
+body
+  font-family: 'Museo Sans'
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+h1,h2,h3
+  font-weight: 100
+  position: relative;
+h1
+  font-size: 40px
+h2
+  font-size: 35px
+h3
+  font-size: 30px
+p
+  font-size: 30px
+  font-weight: 100
+  line-height 1.5
+strong
+  font-weight: 500
+
+.pad-sm
+  padding: 0 20px
+.pad-lg
+  padding: 0 50px
+
+.bg
+  background-size: cover
+  text-shadow: 0 1px #000, 0 2px 10px #000, 0 4px 20px #000
+  text-align: center
+  &:after
+    content: ''
+    display: block
+    position: absolute
+    background: rgba(#000, .2)
+    background-image: radial-gradient(transparent, rgba(#000, .6))
+    background-size: cover
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+  > *
+    position: relative
+    z-index: 10
+
+.bg-plain
+  background-size: cover
+  text-shadow: 0 1px #000, 0 2px 10px #000, 0 4px 20px #000
+  text-align: center
+
+.yellow-bg
+  background: #f5da55
+  color: #000
+  text-align: center
+
+.flex
+  display: flex
+  width: 100%
+
+.flex-1
+  flex: 1
+  position: relative
+
+pre
+  min-width: 500px
+
+.text-center
+  text-align: center
+
+.animate-up
+  margin-top: -1em
+  transition: 1s
+  transition-delay: 2s
+  opacity: 0
+  transform: translate(0, 1em)
+
+.bespoke-active .animate-up
+  opacity: 1
+  transform: translate(0, 0);
+
+.smurf
+  fill: $smurf
+.lips
+  fill: $lips

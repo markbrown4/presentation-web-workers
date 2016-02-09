@@ -52,9 +52,11 @@ html
       section.yellow-bg
         blockquote
           p
+            span &ldquo;
             | Ask any iOS or Android developer how we make our apps so fast,
             br
-            | and most likely you'll hear about two major strategies:
+            | and most likely you'll hear about two major strategies
+            span &rdquo;
           p
             strong Eliminate network calls
             br
@@ -62,17 +64,20 @@ html
 
       section.yellow-bg
         blockquote
-          p(style='margin: 2em 0')
+          h1(style='margin: 2em 0')
             span &ldquo;
-            | Anything unrelated to the UI should be offloaded to a background thread.
+            | Anything unrelated to the UI should be
+            br
+            | offloaded to a background thread.
             span &rdquo;
           p.animate-up Working in the Main Thread should be the exception
 
       section.yellow-bg
         h1 feather-app
         p ~8.5kb JS
+
         p http://feather.surge.sh
-      
+
       section.yellow-bg
         h1 The Main Thread has 3 responsibilities
         p
@@ -81,59 +86,7 @@ html
           | listening for and sending serializable actions back to the worker
           br
           | applying DOM patches when received from worker
-      
-      section
-        h1 main.js
-        pre
-          code.language-javascript.
-            import WorkerThread from './worker.thread'
-            import virtualize from 'vdom-virtualize'
-            import toJson from 'vdom-as-json/toJson'
-            import applyPatch from 'vdom-serialized-patch/patch'
-            import { getLocalPathname } from 'local-links'
 
-            const worker = new WorkerThread()
-            const rootElement = document.body.firstChild
-
-            worker.onmessage = ({data}) =&gt; {
-              const { url, payload } = data
-              requestAnimationFrame(() =&gt; {
-                applyPatch(rootElement, payload)
-              })
-
-              if (location.pathname !== url) {
-                history.pushState(null, null, url)
-              }
-            }
-            
-            // init virtual-dom with server-rendered html
-            worker.postMessage({type: 'start', payload: {
-              virtualDom: toJson(virtualize(rootElement)),
-              url: location.pathname
-            }})
-
-            // Support back buttons
-            window.addEventListener('popstate', () =&gt; {
-              worker.postMessage({type: 'setUrl', payload: location.pathname})
-            })
-
-            // listen for all events globally
-            document.body.addEventListener('click', (event) =&gt; {
-              
-              const pathname = getLocalPathname(event)
-              if (pathname) {
-                event.preventDefault()
-
-                worker.postMessage({type: 'setUrl', payload: pathname})
-                return
-              }
-
-              const click = event.target['data-click']
-              if (click) {
-                event.preventDefault()
-                worker.postMessage(click)
-              }
-            })
       section
         h1 worker.thread.js
         pre
@@ -178,6 +131,61 @@ html
 
               self.postMessage({url: state.url, payload: serializePatch(patches)})
             }
+
+      section
+        h1 main.js
+        pre
+          code.language-javascript.
+            import WorkerThread from './worker.thread'
+            import virtualize from 'vdom-virtualize'
+            import toJson from 'vdom-as-json/toJson'
+            import applyPatch from 'vdom-serialized-patch/patch'
+            import { getLocalPathname } from 'local-links'
+
+            // webpack's worker-loader
+            const worker = new WorkerThread()
+            const rootElement = document.body.firstChild
+
+            worker.onmessage = ({data}) =&gt; {
+              const { url, payload } = data
+              requestAnimationFrame(() =&gt; {
+                applyPatch(rootElement, payload)
+              })
+
+              if (location.pathname !== url) {
+                history.pushState(null, null, url)
+              }
+            }
+            
+            // init virtual-dom with server-rendered html
+            worker.postMessage({type: 'start', payload: {
+              virtualDom: toJson(virtualize(rootElement)),
+              url: location.pathname
+            }})
+
+            // Support back/forward buttons
+            window.addEventListener('popstate', () =&gt; {
+              worker.postMessage({type: 'setUrl', payload: location.pathname})
+            })
+
+            // listen for all events globally
+            document.body.addEventListener('click', (event) =&gt; {
+              
+              const pathname = getLocalPathname(event)
+              if (pathname) {
+                event.preventDefault()
+
+                worker.postMessage({type: 'setUrl', payload: pathname})
+                return
+              }
+
+              const click = event.target['data-click']
+              if (click) {
+                event.preventDefault()
+                worker.postMessage(click)
+              }
+            })
+
       section
         h1 app.js
         pre
@@ -225,7 +233,9 @@ html
           | How to approach the 
           span(style="text-decoration: line-through") Mobile
           |  Web
-        p.animate-up React and Angular 2 both working on it
+        .animate-up
+          p https://github.com/reactjs/react-future
+          p Angular 2 team are all over it
 
       section
         h1 Thanks

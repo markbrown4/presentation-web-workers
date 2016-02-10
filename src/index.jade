@@ -45,7 +45,7 @@ html
 
       section.yellow-bg
         h4(style="font-size: 120px") WEBWORKERS!
-        p.animate-up Even really old android phones have multiple cores
+        p.animate-up Even low-end android phones have multiple cores
 
       section.bg-plain( style="background-image: url(images/pokedex.png)" )
 
@@ -234,8 +234,22 @@ html
           span(style="text-decoration: line-through") Mobile
           |  Web
         .animate-up
-          p https://github.com/reactjs/react-future
-          p Angular 2 team are all over it
+          p
+            a(href="https://github.com/reactjs/react-future") reactjs/react-future
+          p
+            a(href="https://www.youtube.com/watch?v=Kz_zKXiNGSE") Using Web Workers for more responsive apps
+
+      section
+        h1 At best
+        div.box.animate-jank
+        p.animate-up
+          | Unless you can do all your work in 
+          span(style="text-decoration: line-through") 16ms
+          |  8ms
+
+      section
+        h1 At worst
+        img(src="images/unresponsive-script.png")
 
       section
         h1 Thanks

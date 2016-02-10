@@ -7,9 +7,9 @@ Inspired by [@henrikjoreteg](https://twitter.com/henrikjoreteg)'s [feather-app](
 
 This talk came out of watching Henrik Joreteg's pocket-sized JS presentation.  I highly recommend watching it.
 
-Basically, he talked about how we should approach Mobile Web development.
+Basically, he talked about how we should approach Mobile Web development and I'm going to give a quick recap and then look at a project he made called feather-app.
 
-Number 1, actually test and develop on mobile devices.  Not just your iPhone6s but your low-end Android phones too.
+Number 1, actually test and develop on mobile devices.  Not just your iPhone 6s but your low-end Android phones too.
 
 Don't do this, send HTML from the server.
 This doesn't have to be all or nothing either, you don't need to make a completely universal application, just render something initially from the server.
@@ -24,7 +24,7 @@ And we should use WebWorkers if we want to make fast web apps on mobile.
 He was heavily inspired by Nolan Lawson's blog post detailing how he made pokedex.org, which uses ServiceWorker, IndexedDB and WebWorkers to make a progressive web app.
 
 Nolan wrote "Ask any iOS or Android developer how we make our apps so fast, and most likely you'll hear about two major strategies. Eliminate network calls, and use background threads."
-For us that means using ServiceWorker and WebWorker.
+For us that means using things like ServiceWorker, persistent data stores like localStorage or IndexedDB and WebWorkers.
 
 The key take out for me is this: "Anything unrelated to the UI should be offloaded to a background thread.".
 This is very different to how I viewed WebWorkers previously.  We should be treating the Main Thread in JavaScript as the UI thread, responding to events, updating the DOM - Everything else belongs in a background thread.

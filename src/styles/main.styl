@@ -119,6 +119,9 @@ strong
   color: #000
   text-align: center
 
+.yellow-bg a
+  color: inherit
+
 .flex
   display: flex
   width: 100%
@@ -139,6 +142,25 @@ pre
   transition-delay: 2s
   opacity: 0
   transform: translate(0, 1em)
+
+.box
+  display: block
+  height: 100px
+  width: 100px
+  background: $smurf
+  margin-bottom: 50px
+
+@keyframes jank {
+  from {
+    transform: translate(-200px, 0)
+  }
+  to {
+    transform: translate(200px, 0)
+  }
+}
+
+.animate-jank
+  animation: jank 4s steps(30, end) infinite
 
 .bespoke-active .animate-up
   opacity: 1
